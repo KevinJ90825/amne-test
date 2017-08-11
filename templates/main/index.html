@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html class="no-js css-menubar" lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <h1 style="text-align: center;">Amne Test</h1>
+            <h2 class="small" style="text-align: right;">Kevin Johnson</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <form class="form" id="address_form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="control-label" for="address1">Address 1:</label>
+                        <input type="text" id="address1" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="address2">Address 2:</label>
+                        <input type="text" id="address2" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="col-md-8">
+                <div id="results"></div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script>
+
+      var autocomplete1, autocomplete2;
+      var bounds1, bounds2;
+      var service, map;
+
+      function initAutocomplete() {
+        var defaultBounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(30.268716, -97.742715));
+
+        autocomplete = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('address1')),
+            {types: ['address'], bounds: defaultBounds});
+        autocomplete2 = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('address2')),
+            {types: ['address'], bounds: defaultBounds});
+
+        map = new google.maps.Map(
+            /** @type {!HTMLInputElement} */(document.getElementById('map')),
+            {center: defaultBounds});
+
+        service = new google.maps.places.PlacesService(map);
+
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            console.log(place);
+            $('#address1').val(place.formatted_address);
+            bounds1 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
+            console.log(bounds1);
+        });
+        autocomplete2.addListener('place_changed', function() {
+            var place = autocomplete2.getPlace();
+            console.log(place);
+            $('#address2').val(place.formatted_address);
+            bounds2 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
+            console.log(bounds2);
+        });
+      }
+
+      function placesCallback(results, status) {
+
+        $.each(results, function(index, p) {
+            console.log(p);
+
+            var elem = "<div class='row'><h4>" + p.name + "</h4><p class='small'>" + p.vicinity + "</p></div>";
+            $('#results').append(elem);
+        });
+      }
+
+      $(document).ready(function() {
+        initAutocomplete();
+
+        $('#address_form').submit(function(e) {
+            e.preventDefault();
+
+            var request = {
+                location: bounds1,
+                radius: '16094',
+                type: ['real_estate_agency'],
+                keyword: 'real estate'
+              };
+
+
+            $('#results').empty();
+            service.nearbySearch(request, placesCallback);
+        });
+      });
+    </script>
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key={{PLACES_API_KEY}}&libraries=places"></script>
+</body>
+</html>
