@@ -3,6 +3,22 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        .loader {
+            border: 3px solid #f3f3f3; /* Light grey */
+            border-top: 3px solid #3498db; /* Blue */
+            border-radius: 50%;
+            margin-top: 15px;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -40,6 +56,23 @@
       var autocomplete1, autocomplete2;
       var bounds1, bounds2;
       var service, map;
+      var all_results = [];
+
+        function distance(latlon1, latlon2) {
+            var radlat1 = Math.PI * latlon1.lat()/180;
+            var radlat2 = Math.PI * latlon2.lat()/180;
+            var theta = latlon1.lng()-latlon2.lng();
+            var radtheta = Math.PI * theta/180
+            var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            dist = Math.acos(dist)
+            dist = dist * 180/Math.PI
+            dist = dist * 60 * 1.1515
+            return dist
+        }
+
+        function comparePlaces(p1, p2) {
+            return p1['distance'] - p2['distance']
+        }
 
       function initAutocomplete() {
         var defaultBounds = new google.maps.LatLngBounds(
@@ -60,27 +93,49 @@
 
         autocomplete.addListener('place_changed', function() {
             var place = autocomplete.getPlace();
-            console.log(place);
             $('#address1').val(place.formatted_address);
             bounds1 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
-            console.log(bounds1);
         });
         autocomplete2.addListener('place_changed', function() {
             var place = autocomplete2.getPlace();
-            console.log(place);
             $('#address2').val(place.formatted_address);
             bounds2 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
-            console.log(bounds2);
         });
       }
 
+      function placeDetailsCallback(results, status) {
+        console.log(status);
+      }
+
       function placesCallback(results, status) {
+        console.log(results)
+        if (all_results.length == 0) {
+            all_results = results;
+            return;
+        }
+        all_results = all_results.concat(results);
+        console.log(bounds1);
+        console.log(bounds2);
+        $.each(all_results, function(index, p) {
+            var dis = 0;
+            if (bounds1) {
+                dis += distance(p.geometry.location, bounds1);
+            }
+            if (bounds2) {
+                dis += distance(p.geometry.location, bounds2);
+            }
+            p['distance'] = dis;
+        });
+        all_results.sort(comparePlaces);
+        $.each(all_results, function(index, p) {
 
-        $.each(results, function(index, p) {
-            console.log(p);
+            var elem = "<div class='row' id='" + p.place_id + "'><div class='col-md-7'><h4>" +
+                p.name + "</h4><p class='small'>" + p.vicinity + " ( " + p.distance.toFixed(2) +
+                " miles )</p></div><div class='col-md-5'><div class='loader'></div></div></div>";
 
-            var elem = "<div class='row'><h4>" + p.name + "</h4><p class='small'>" + p.vicinity + "</p></div>";
             $('#results').append(elem);
+
+            service.getDetails({placeId: p.place_id}, placeDetailsCallback);
         });
       }
 
@@ -100,6 +155,15 @@
 
             $('#results').empty();
             service.nearbySearch(request, placesCallback);
+
+            var request2 = {
+                location: bounds2,
+                radius: '16094',
+                type: ['real_estate_agency'],
+                keyword: 'real estate'
+              };
+            console.log(request2);
+            service.nearbySearch(request2, placesCallback);
         });
       });
     </script>
