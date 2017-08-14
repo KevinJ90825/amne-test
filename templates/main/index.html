@@ -53,10 +53,10 @@
             crossorigin="anonymous"></script>
     <script>
 
-      var autocomplete1, autocomplete2;
-      var bounds1, bounds2;
-      var service, map;
-      var all_results;
+        var autocomplete1, autocomplete2;
+        var bounds1, bounds2;
+        var service, map;
+        var all_results;
 
         function distance(latlon1, latlon2) {
             var radlat1 = Math.PI * latlon1.lat()/180;
@@ -74,81 +74,77 @@
             return p1['distance'] - p2['distance']
         }
 
-      function initAutocomplete() {
-        var defaultBounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(30.268716, -97.742715));
+        function initAutocomplete() {
+            var defaultBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(30.268716, -97.742715));
 
-        autocomplete = new google.maps.places.Autocomplete(
+            autocomplete = new google.maps.places.Autocomplete(
             /** @type {!HTMLInputElement} */(document.getElementById('address1')),
             {types: ['address'], bounds: defaultBounds});
-        autocomplete2 = new google.maps.places.Autocomplete(
+            autocomplete2 = new google.maps.places.Autocomplete(
             /** @type {!HTMLInputElement} */(document.getElementById('address2')),
             {types: ['address'], bounds: defaultBounds});
 
-        map = new google.maps.Map(
+            map = new google.maps.Map(
             /** @type {!HTMLInputElement} */(document.getElementById('map')),
             {center: defaultBounds});
 
-        service = new google.maps.places.PlacesService(map);
+            service = new google.maps.places.PlacesService(map);
 
-        autocomplete.addListener('place_changed', function() {
-            var place = autocomplete.getPlace();
-            $('#address1').val(place.formatted_address);
-            bounds1 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
-        });
-        autocomplete2.addListener('place_changed', function() {
-            var place = autocomplete2.getPlace();
-            $('#address2').val(place.formatted_address);
-            bounds2 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
-        });
-      }
-
-      function placesCallback(results, status) {
-        console.log(results)
-        if (all_results.length == 0 && bounds1 && bounds2) {
-            all_results = results;
-            return;
+            autocomplete.addListener('place_changed', function() {
+                var place = autocomplete.getPlace();
+                $('#address1').val(place.formatted_address);
+                bounds1 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
+            });
+            autocomplete2.addListener('place_changed', function() {
+                var place = autocomplete2.getPlace();
+                $('#address2').val(place.formatted_address);
+                bounds2 = new google.maps.LatLng(place.geometry.location.lat(),place.geometry.location.lng());
+            });
         }
-        all_results = all_results.concat(results);
-        console.log(bounds1);
-        console.log(bounds2);
-        $.each(all_results, function(index, p) {
-            var dis = 0;
-            if (bounds1) {
+
+        function placesCallback(results, status) {
+            if (all_results.length == 0 && bounds1 && bounds2) {
+                all_results = results;
+                return;
+            }
+            all_results = all_results.concat(results);
+            $.each(all_results, function(index, p) {
+                var dis = 0;
+                if (bounds1) {
                 dis += distance(p.geometry.location, bounds1);
-            }
-            if (bounds2) {
+                }
+                if (bounds2) {
                 dis += distance(p.geometry.location, bounds2);
-            }
-            p['distance'] = dis;
-        });
-        all_results.sort(comparePlaces);
-        $.each(all_results, function(index, p) {
-            console.log(p);
-            var elem = "<div class='row' id='" + p.place_id + "'><div class='col-md-7'><h4>" +
+                }
+                p['distance'] = dis;
+            });
+            all_results.sort(comparePlaces);
+            $.each(all_results, function(index, p) {
+                var elem = "<div class='row' id='" + p.place_id + "'><div class='col-md-7'><h4>" +
                 p.name + "</h4><p class='small'>" + p.vicinity + " ( " + p.distance.toFixed(2) +
                 " miles )</p></div><div class='col-md-5'></div></div>";
 
-            $('#results').append(elem);
-        });
-      }
+                $('#results').append(elem);
+            });
+        }
 
-      $(document).ready(function() {
-        initAutocomplete();
+        $(document).ready(function() {
+            initAutocomplete();
 
-        $('#address_form').submit(function(e) {
-            e.preventDefault();
-            $('#results').empty();
-            all_results = [];
+            $('#address_form').submit(function(e) {
+                e.preventDefault();
+                $('#results').empty();
+                all_results = [];
 
-            if (bounds1) {
-                var request = {
-                    location: bounds1,
-                    radius: '16094',
-                    type: ['real_estate_agency'],
-                    keyword: 'real estate'
-                  };
-                service.nearbySearch(request, placesCallback);
+                if (bounds1) {
+                    var request = {
+                        location: bounds1,
+                        radius: '16094',
+                        type: ['real_estate_agency'],
+                        keyword: 'real estate'
+                    };
+                    service.nearbySearch(request, placesCallback);
             }
 
             if (bounds2) {
@@ -157,12 +153,11 @@
                     radius: '16094',
                     type: ['real_estate_agency'],
                     keyword: 'real estate'
-                  };
-                console.log(request2);
+                };
                 service.nearbySearch(request2, placesCallback);
             }
         });
-      });
+    });
     </script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key={{PLACES_API_KEY}}&libraries=places"></script>
