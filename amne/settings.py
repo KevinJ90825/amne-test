@@ -27,7 +27,10 @@ SECRET_KEY = '3wwmtry@(iqw98&txi(#%1tts63*zb(mqmh9^st#&si&1pr#&!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'amne-test.herokuapp.com',
+    '127.0.0.1:8080'
+]
 
 
 # Application definition
