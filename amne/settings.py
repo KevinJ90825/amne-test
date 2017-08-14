@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-GOOGLE_PLACES_KEY = os.environ.get('GOOGLE_PLACES_KEY', 'AIzaSyA_o5u4LibRvFNRIj831A17Muqe1OqDlJs')
+GOOGLE_PLACES_KEY = os.environ.get('GOOGLE_PLACES_KEY', '')
 
 
 # Quick-start development settings - unsuitable for production
