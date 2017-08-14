@@ -56,7 +56,7 @@
       var autocomplete1, autocomplete2;
       var bounds1, bounds2;
       var service, map;
-      var all_results = [];
+      var all_results;
 
         function distance(latlon1, latlon2) {
             var radlat1 = Math.PI * latlon1.lat()/180;
@@ -139,6 +139,7 @@
         $('#address_form').submit(function(e) {
             e.preventDefault();
             $('#results').empty();
+            all_results = [];
 
             if (bounds1) {
                 var request = {
