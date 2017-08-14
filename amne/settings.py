@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'amne.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
